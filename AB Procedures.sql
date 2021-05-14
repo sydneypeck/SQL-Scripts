@@ -1,0 +1,2 @@
+Select poavd.procedureorderkey, string_agg(Right(ad.name, len(ad.name)-75),', ') [Name] from procedureorderattributevaluedim POAVD
+Inner Join attributedim AD on AD.attributekey = poavd.attributekey and ad.smartdataelementepicid IN ('EPIC#31000051734', 'EPIC#31000198746', 'EPIC#31000198747', 'EPIC#31000198751', 'EPIC#31000198752', 'EPIC#31000208610', 'EPIC#31000198753', 'EPIC#31000198750', 'EPIC#31000135563', 'EPIC#31000135564') Group by poavd.ProcedureOrderKey
