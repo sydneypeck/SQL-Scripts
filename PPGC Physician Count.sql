@@ -1,38 +1,17 @@
 Select DISTINCT 
- pd.name
-, pd.patientkey
-, encf.EncounterEpicCsn
-, encf.encounterkey
-, pf.pregnancykey
-, pd.PrimaryMrn [1. Patient's ID Number]
+pd.PrimaryMrn [1. Patient's ID Number]
 , CONVERT(varchar,dos.DateValue,101)  [2. Date Termination Performed]
-, age.Years [3. Patient's age]
-, pd. Address + ', ' + pd.City + ', ' + pd.county + ', ' + pd. StateOrProvinceAbbreviation [4. Patient's Residence Address]
-, vf.LMP_X [6. Date last normal menses began]
---, Cast(GA.weeks as varchar) + 'w' + Cast(GA.Days % GA.Weeks as varchar) + 'd' [7. Clinical estimation of Gestational Age]
-, encfhx.obliving_x [8a. Live births now living]
-, (encfhx.oblivebirths_X - encfhx.obliving_X) [8b. Live births now dead]
-, pf.PregnancySpontaneousAbortionCount [9a. Spontaneous Abortions]
-, pf.PregnancyTherapeuticAbortionCount [9b. Therapeutic Abortions]
-, pd.MaritalStatus [10. Marital Status]
-, pd.HighestLevelOfEducation [11. Education]
-, pd.Ethnicity [12. Is patient of Hispanic origin?]
-, Case when pd.MultiRacial = 0 then pd.FirstRace else pd.firstrace + ', ' + ', ' +pd.secondrace + ', ' + pd.ThirdRace + ', ' + pd.FourthRace + ', ' + pd.fifthrace END  [13. Patient's race] 
-, CASE when bcm.Value is not NULL then 'Yes' else 'No' END [14. Was birth control being used] 
-, bcm.Value [14a. BCM]
+, provd.name [Provider]
+, Cast(GA.weeks as varchar) + 'w' + Cast(GA.Days % GA.Weeks as varchar) + 'd' [7. Clinical estimation of Gestational Age]
 , dep.LocationName [15. Name of Facility]
-, Dep.city + ', ' + Dep.county + ', ' + Dep.StateOrProvinceAbbreviation + ', ' + Dep.PostalCode [16. Location of Termination] 
 , Case when p.Name is NOT NULL then p.name when  mabcomp.name IS NOT NULL then mabcomp.name else ' ' end [17 & 18. Procedures]
-, Case when mabcomp.name IS NOT NULL then 'Yes' when fu.Value =1 then 'Yes' else 'No' end [19. Follow up Recommended]
-, CASE when edu.stringValue is not NULL then 'Yes' else 'No' END [20. Was postop info provided]
 , CASE when comp.name is null then 'NONE' else comp.name END [21. Complications]
-, Case when fuenc.encounterdatekey is not NULL and fuvf.appointmentstatus = 'Completed' then 'Yes' else 'No' END [22. Further visits]
-, CASE when ED.StringValue is null then 'No' else 'Yes- See chart' END [23. Was patient seen outside clinic]
 FROM EncounterFact encf
 Join DateDim dos on dos.Datekey = encf.DateKey
 Join PatientDim PD on pd.PatientKey = encf.PatientKey
 Join durationdim age on age.DurationKey = encf.AgeKey
 Join visitfact VF on VF.EncounterKey = encf.EncounterKey
+Join providerdim provd on vf.primaryvisitproviderkey = provd.providerkey
 Left Join episodeencountermappingfact eemf on eemf.encounterkey = encf.encounterkey 
 Inner Join episodefact ef on eemf.episodekey = ef.episodekey and ef.type = 'Pregnancy'
 Left Join pregnancyfact pf on ef.episodekey = pf.episodekey
@@ -80,8 +59,9 @@ Left Join (
 		Inner Join attributedim AD on AD.attributekey = poavd.attributekey and ad.smartdataelementepicid IN ('PP#555', 'PP#556', 'PP#557', 'PP#558')
 		Join procedureorderfact pof on pof.procedureorderkey = poavd.procedureorderkey) as MABComp on mabcomp.encounterkey = encf.encounterkey
 Left Join encounterfact encfhx on encfhx.patientkey = encf.patientkey AND encfhx.type = 'History'
-Where (ica.NAME is NOT NULL or MABcomp.name IS NOT NULL) and pd.name not like 'ZZ%'
---Other filters as parameters
+Where (ica.NAME is NOT NULL or MABcomp.name IS NOT NULL) and pd.name not like 'ZZ%' and dos.monthnumber = 5 and dep.name like 'PPGC%'
+Order by CONVERT(varchar,dos.DateValue,101)
+
 
 
 

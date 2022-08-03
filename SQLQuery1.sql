@@ -1,0 +1,1 @@
+select * from procedureeventfact where procedurekey = '40055'

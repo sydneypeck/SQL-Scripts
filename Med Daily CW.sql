@@ -46,19 +46,20 @@ from clarity_ucl cu
 Join clarity_eap ce on ce.PROC_ID = cu.PROCEDURE_ID
 --Left Join ARPB_TRANSACTIONS ATX on ATX.PROC_ID = cu.PROCEDURE_ID  and cu.EPT_CSN = ATX.PAT_ENC_CSN_ID
 Join PATIENT p on p.PAT_ID = cu.PATIENT_ID
-Join CLARITY_EAP_OT ceo on ceo.PROC_ID = ce.PROC_ID
+Left Join CLARITY_EAP_OT ceo on ceo.PROC_ID = ce.PROC_ID
 Left Join clarity_medication cm on cm.medication_id = cu.MEDICATION_ID
 where
-cu.NDC_CODE_ID is not null and  --gets CAM and Willow
+(cu.NDC_CODE_ID is NOT null or cu.MEDICATION_ID is not null) and  --gets CAM and Willow
 cu.SYSTEM_FLAG_C IN ('1', '3') and --New or modified only
 cu.SERVICE_DATE_DT > '2021-05-02' and 
 ceo.CODE_TYPE_C IN ('2', '100') and
 ceo.CPT_CODE != 'T1015'
-Order by PROC_NAME
+and (PROC_CODE in ('S0190') or (cu.PROC_DESCRIPTION LIKE '%miso%'))
+Order by PAT_NAME
 
-
+Select * from clarity_ucl where patient_id = 'Z10899'
 
 Select cu.* from CLARITY_EAP_OT ceo 
 Join CLARITY_UCL cu on cu.PROCEDURE_ID = ceo.PROC_ID
-where CPT_CODE = 'J2790'
+where cu.PROC_DESCRIPTION like 'miso%'
  

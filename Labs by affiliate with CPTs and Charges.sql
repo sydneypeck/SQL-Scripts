@@ -23,3 +23,4 @@ where lplii.preference_ID = '6488' -- This is PPGC's fee schedule ID
 --Select * from clarity_fsc where FEE_SCHEDULE_NAME like 'PPGC%' -- Use to get Fee Schedule ID
 
 
+Select * from LPF_PRF_LST_ID_ITM lplii where lplii.PREFERENCE_ID = '6488'
